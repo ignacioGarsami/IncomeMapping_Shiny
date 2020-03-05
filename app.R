@@ -63,7 +63,7 @@ server <- function(input, output) {
         
         leafletProxy("map", data = filteredData()) %>%
             clearShapes() %>%
-            addCircles(radius = ~Mean*2/100, weight = 1, color = "#777777",
+            addCircles(radius = ~Mean*2/10, weight = 1, color = "#777777",
                        fillColor = ~pal(Mean), fillOpacity = 0.7, popup = ~paste(Mean)
             )
     })
