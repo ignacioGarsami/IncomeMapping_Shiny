@@ -16,6 +16,7 @@ source('utils/utils.R')
 data = data_downloader()
 
 state_names = unique(data$State_Name)
+county_names = unique(data$County)
 
 r_colors <- rgb(t(col2rgb(colors()) / 255))
 names(r_colors) <- colors()
@@ -29,10 +30,15 @@ dataSelection = absolutePanel(top = 10, right = 10,
                                            label="Select State", 
                                            multiple = TRUE,
                                            choices = state_names),
+                              selectInput("selCounty", 
+                                          label="Select County", 
+                                          multiple = TRUE,
+                                          choices = county_names),
                                selectInput("colors", "Color Scheme",
                                            rownames(subset(brewer.pal.info, category %in% c("seq", "div")))
                                ),
-                               checkboxInput("legend", "Show legend", TRUE)
+                               checkboxInput("legend", "Show legend", TRUE),
+                               downloadButton('downloadData', 'Download selected data')
                 )
 
 # headerRow = div(id='header', useShinyjs(),
@@ -72,7 +78,7 @@ ui = navbarPage('US Income', id = 'navBar', mapPanel, dataPanel)
 
 
 # Define server logic required to draw a histogram
-server <- function(input, output) {
+server <- function(input, output, session) {
 # 
 #     observe(if(input$navBar=="Map of incomes in the US") {
 #         cat(file=stderr(), input$navBar, "\n")
@@ -81,14 +87,19 @@ server <- function(input, output) {
 #         cat(file=stderr(), input$navBar, "\n")
 #         shinyjs::show("header")
 #     })
-#     
+#    
     
+    # 
     # Reactive expression for the data subsetted to what the user selected
     filteredData <- reactive({
-        if(is.null(input$selState)){
+        if(is.null(input$selState) & is.null(input$selCounty)){
             data[data$Mean >= input$range[1] & data$Mean <= input$range[2],]
-        }else{
-            data[data$Mean >= input$range[1] & data$Mean <= input$range[2] & data$State_Name == input$selState,]
+        }else if(is.null(input$selState) & is.null(input$selCounty) == FALSE){
+            data[data$Mean >= input$range[1] & data$Mean <= input$range[2] & data$County %in% input$selCounty,]
+        }else if(is.null(input$selState) == FALSE & is.null(input$selCounty)){
+            data[data$Mean >= input$range[1] & data$Mean <= input$range[2] & data$State_Name %in% input$selState,]
+        }else if(is.null(input$selState) == FALSE & is.null(input$selCounty) == FALSE){
+            data[(data$Mean >= input$range[1] & data$Mean <= input$range[2]) & (data$County %in% input$selCounty | data$State_Name %in% input$selState),]
         }
 
     })
@@ -149,6 +160,15 @@ server <- function(input, output) {
     output$dataTable <- renderTable({
         filteredData()
     })
+    
+    output$downloadData = downloadHandler(
+        filename = function() {
+            paste('income_data', '.csv', sep='')
+        },
+        content = function(con) {
+            write.csv(filteredData(), con)
+        }
+    )
 }
 
 # Run the application 
