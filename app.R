@@ -8,6 +8,7 @@
 #
 
 library(shiny)
+library(shinyjs)
 library(leaflet)
 library(RColorBrewer)
 source('utils/utils.R')
@@ -18,31 +19,69 @@ state_names = unique(data$State_Name)
 
 r_colors <- rgb(t(col2rgb(colors()) / 255))
 names(r_colors) <- colors()
-# Define UI for application that draws a histogram
-ui <- bootstrapPage(
-   
-     tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
-    
-     leafletOutput("map", width = "100%", height = "100%"),
-    
-      absolutePanel(top = 10, right = 10,
-                    sliderInput("range", "Mean Income", min(data$Mean), max(data$Mean),
-                                value = range(data$Mean), step = 0.1
-                    ),
-                  selectInput("selState", 
-                              label="Select State", 
-                              multiple = TRUE,
-                              choices = state_names),
-                  selectInput("colors", "Color Scheme",
-                              rownames(subset(brewer.pal.info, category %in% c("seq", "div")))
-                  ),
-                  checkboxInput("legend", "Show legend", TRUE)
-    )
+
+
+dataSelection = absolutePanel(top = 10, right = 10,
+                               sliderInput("range", "Mean Income", min(data$Mean), max(data$Mean),
+                                           value = range(data$Mean), step = 0.1
+                               ),
+                               selectInput("selState", 
+                                           label="Select State", 
+                                           multiple = TRUE,
+                                           choices = state_names),
+                               selectInput("colors", "Color Scheme",
+                                           rownames(subset(brewer.pal.info, category %in% c("seq", "div")))
+                               ),
+                               checkboxInput("legend", "Show legend", TRUE)
+                )
+
+headerRow = div(id='header', useShinyjs(),
+                absolutePanel(
+                              sliderInput("range", "Mean Income", min(data$Mean), max(data$Mean),
+                                          value = range(data$Mean), step = 0.1
+                              ),
+                              selectInput("selState", 
+                                          label="Select State", 
+                                          multiple = TRUE,
+                                          choices = state_names),
+                              selectInput("colors", "Color Scheme",
+                                          rownames(subset(brewer.pal.info, category %in% c("seq", "div")))
+                              ),
+                              checkboxInput("legend", "Show legend", TRUE)
+))
+
+
+map = leafletOutput("map", width = "100%", height = "90vh")
+
+mapPanel = tabPanel('Map of incomes in the US',
+                    fluidRow(
+                        column(width = 10, map),
+                        column(width = 2, dataSelection)
+                    )
+            )
+
+
+dataPanel <- tabPanel("Data",
+                      div(tableOutput('dataTable'))
+                      
 )
+
+
+ui = navbarPage('US Income', id = 'navBar',header = headerRow, mapPanel, dataPanel)
+
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
 
+    observe(if(input$navBar=="Map of incomes in the US") {
+        cat(file=stderr(), input$navBar, "\n")
+        shinyjs::hide("header")
+    } else {
+        cat(file=stderr(), input$navBar, "\n")
+        shinyjs::show("header")
+    })
+    
+    
     # Reactive expression for the data subsetted to what the user selected
     filteredData <- reactive({
         if(is.null(input$selState)){
@@ -104,6 +143,10 @@ server <- function(input, output) {
                                 pal = pal, values = ~Mean
             )
         }
+    })
+    
+    output$dataTable <- renderTable({
+        filteredData()
     })
 }
 
