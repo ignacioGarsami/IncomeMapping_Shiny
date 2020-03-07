@@ -11,6 +11,7 @@ library(shiny)
 library(shinyjs)
 library(leaflet)
 library(RColorBrewer)
+library(leafpop)
 source('utils/utils.R')
 
 data = data_downloader()
@@ -58,6 +59,10 @@ dataPanel <- tabPanel("Data",
                       
 )
 
+plotlyPanel <- tabPanel("Plotly",
+                        plotly::plotlyOutput("plotlyData")
+)
+
 
 # ui = navbarPage('US Income', id = 'navBar',header = headerRow, mapPanel, dataPanel)
 #ui = navbarPage('US Income', id = 'navBar', mapPanel, dataPanel)
@@ -88,6 +93,8 @@ ui <- bootstrapPage(
                   )
                   
     )
+
+
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
@@ -138,21 +145,19 @@ server <- function(input, output, session) {
     # should be managed in its own observer.
     observe({
         pal <- colorpal()
-        
+
         leafletProxy("map", data = filteredData()) %>%
             clearMarkers() %>%
             addCircleMarkers( weight = 1, color = "#777777",
                        fillColor = ~pal(Mean), fillOpacity = 0.7, popup = ~paste("State:", State_Name, "<br>",
-                                                                                "County:", County, "<br>",
-                                                                                "City:", City, "<br>",
-                                                                                "Place:", Place, "<br>",
-                                                                                "Zip Code:", Zip_Code, "<br>",
-                                                                                "Mean Income:", Mean
-                           
-                       )
+                                                                                 "County:", County, "<br>",
+                                                                                 "City:", City, "<br>",
+                                                                                 "Place:", Place, "<br>",
+                                                                                 "Zip Code:", Zip_Code, "<br>",
+                                                                                 "Mean Income:", Mean)
             )
     })
-    
+
     
     # Use a separate observer to recreate the legend as needed.
     observe({
@@ -181,6 +186,14 @@ server <- function(input, output, session) {
             write.csv(filteredData(), con)
         }
     )
+    
+    graph = function(x,y){
+        plotly::renderPlotly({
+                ggplot() + aes(x=x, y=y) +
+                geom_col()
+        })
+    }
+    
 }
 
 # Run the application 
