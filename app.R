@@ -14,16 +14,25 @@ source('utils/utils.R')
 
 data = data_downloader()
 
+state_names = unique(data$State_Name)
+
 r_colors <- rgb(t(col2rgb(colors()) / 255))
 names(r_colors) <- colors()
 # Define UI for application that draws a histogram
 ui <- bootstrapPage(
-    tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
-    leafletOutput("map", width = "100%", height = "100%"),
-    absolutePanel(top = 10, right = 10,
-                  sliderInput("range", "Mean Income", min(data$Mean), max(data$Mean),
-                              value = range(data$Mean), step = 0.1
-                  ),
+   
+     tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
+    
+     leafletOutput("map", width = "100%", height = "100%"),
+    
+      absolutePanel(top = 10, right = 10,
+                    sliderInput("range", "Mean Income", min(data$Mean), max(data$Mean),
+                                value = range(data$Mean), step = 0.1
+                    ),
+                  selectInput("selState", 
+                              label="Select State", 
+                              multiple = TRUE,
+                              choices = state_names),
                   selectInput("colors", "Color Scheme",
                               rownames(subset(brewer.pal.info, category %in% c("seq", "div")))
                   ),
@@ -36,8 +45,14 @@ server <- function(input, output) {
 
     # Reactive expression for the data subsetted to what the user selected
     filteredData <- reactive({
-        data[data$Mean >= input$range[1] & data$Mean <= input$range[2],]
+        if(is.null(input$selState)){
+            data[data$Mean >= input$range[1] & data$Mean <= input$range[2],]
+        }else{
+            data[data$Mean >= input$range[1] & data$Mean <= input$range[2] & data$State_Name == input$selState,]
+        }
+
     })
+    
     
     # This reactive expression represents the palette function,
     # which changes as the user makes selections in UI.
@@ -62,11 +77,19 @@ server <- function(input, output) {
         pal <- colorpal()
         
         leafletProxy("map", data = filteredData()) %>%
-            clearShapes() %>%
-            addCircles(radius = ~Mean*2/10, weight = 1, color = "#777777",
-                       fillColor = ~pal(Mean), fillOpacity = 0.7, popup = ~paste(Mean)
+            clearMarkers() %>%
+            addCircleMarkers( weight = 1, color = "#777777",
+                       fillColor = ~pal(Mean), fillOpacity = 0.7, popup = ~paste("State:", State_Name, "<br>",
+                                                                                "County:", County, "<br>",
+                                                                                "City:", City, "<br>",
+                                                                                "Place:", Place, "<br>",
+                                                                                "Zip Code:", Zip_Code, "<br>",
+                                                                                "Mean Income:", Mean
+                           
+                       )
             )
     })
+    
     
     # Use a separate observer to recreate the legend as needed.
     observe({
