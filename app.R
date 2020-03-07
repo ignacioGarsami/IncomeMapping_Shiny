@@ -35,20 +35,20 @@ dataSelection = absolutePanel(top = 10, right = 10,
                                checkboxInput("legend", "Show legend", TRUE)
                 )
 
-headerRow = div(id='header', useShinyjs(),
-                absolutePanel(
-                              sliderInput("range", "Mean Income", min(data$Mean), max(data$Mean),
-                                          value = range(data$Mean), step = 0.1
-                              ),
-                              selectInput("selState", 
-                                          label="Select State", 
-                                          multiple = TRUE,
-                                          choices = state_names),
-                              selectInput("colors", "Color Scheme",
-                                          rownames(subset(brewer.pal.info, category %in% c("seq", "div")))
-                              ),
-                              checkboxInput("legend", "Show legend", TRUE)
-))
+# headerRow = div(id='header', useShinyjs(),
+#                 absolutePanel(
+#                               sliderInput("range", "Mean Income", min(data$Mean), max(data$Mean),
+#                                           value = range(data$Mean), step = 0.1
+#                               ),
+#                               selectInput("selState", 
+#                                           label="Select State", 
+#                                           multiple = TRUE,
+#                                           choices = state_names),
+#                               selectInput("colors", "Color Scheme",
+#                                           rownames(subset(brewer.pal.info, category %in% c("seq", "div")))
+#                               ),
+#                               checkboxInput("legend", "Show legend", TRUE)
+# ))
 
 
 map = leafletOutput("map", width = "100%", height = "90vh")
@@ -62,25 +62,26 @@ mapPanel = tabPanel('Map of incomes in the US',
 
 
 dataPanel <- tabPanel("Data",
-                      div(tableOutput('dataTable'))
+                      tableOutput('dataTable')
                       
 )
 
 
-ui = navbarPage('US Income', id = 'navBar',header = headerRow, mapPanel, dataPanel)
+# ui = navbarPage('US Income', id = 'navBar',header = headerRow, mapPanel, dataPanel)
+ui = navbarPage('US Income', id = 'navBar', mapPanel, dataPanel)
 
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-
-    observe(if(input$navBar=="Map of incomes in the US") {
-        cat(file=stderr(), input$navBar, "\n")
-        shinyjs::hide("header")
-    } else {
-        cat(file=stderr(), input$navBar, "\n")
-        shinyjs::show("header")
-    })
-    
+# 
+#     observe(if(input$navBar=="Map of incomes in the US") {
+#         cat(file=stderr(), input$navBar, "\n")
+#         shinyjs::hide("header")
+#     } else {
+#         cat(file=stderr(), input$navBar, "\n")
+#         shinyjs::show("header")
+#     })
+#     
     
     # Reactive expression for the data subsetted to what the user selected
     filteredData <- reactive({
