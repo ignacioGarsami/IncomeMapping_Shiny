@@ -41,21 +41,6 @@ dataSelection = absolutePanel(top = 10, right = 10,
                                downloadButton('downloadData', 'Download selected data')
                 )
 
-# headerRow = div(id='header', useShinyjs(),
-#                 absolutePanel(
-#                               sliderInput("range", "Mean Income", min(data$Mean), max(data$Mean),
-#                                           value = range(data$Mean), step = 0.1
-#                               ),
-#                               selectInput("selState", 
-#                                           label="Select State", 
-#                                           multiple = TRUE,
-#                                           choices = state_names),
-#                               selectInput("colors", "Color Scheme",
-#                                           rownames(subset(brewer.pal.info, category %in% c("seq", "div")))
-#                               ),
-#                               checkboxInput("legend", "Show legend", TRUE)
-# ))
-
 
 map = leafletOutput("map", width = "100%", height = "90vh")
 
@@ -68,12 +53,12 @@ mapPanel = tabPanel('Map of incomes in the US',
 
 
 dataPanel <- tabPanel("Data",
+                      downloadButton('test','Just testing'),
                       tableOutput('dataTable')
                       
 )
 
 
-# ui = navbarPage('US Income', id = 'navBar',header = headerRow, mapPanel, dataPanel)
 ui = navbarPage('US Income', id = 'navBar', mapPanel, dataPanel)
 
 
@@ -135,7 +120,8 @@ server <- function(input, output, session) {
                                                                                 "City:", City, "<br>",
                                                                                 "Place:", Place, "<br>",
                                                                                 "Zip Code:", Zip_Code, "<br>",
-                                                                                "Mean Income:", Mean
+                                                                                "Mean Income:", Mean, "<br>",
+                                                                                'Std Deviation:', Stdev
                            
                        )
             )
