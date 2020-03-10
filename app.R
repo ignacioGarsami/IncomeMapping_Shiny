@@ -11,6 +11,8 @@ library(shiny)
 library(shinyjs)
 library(leaflet)
 library(RColorBrewer)
+library(tidyverse)
+library(plotly)
 source('utils/utils.R')
 
 data = data_downloader()
@@ -53,21 +55,19 @@ mapPanel = tabPanel('Map of incomes in the US',
 
 
 dataPanel <- tabPanel("Data",
-                      downloadButton('test','Just testing'),
-                      tableOutput('dataTable')
-                      
-)
-
-dataPanel <- tabPanel("Data",
+                      h2('Income visualizations'),
                       fluidRow(
-                          column(width = 6,height = 20,
+                          column(width = 6,style='height:70vh',
                                 plotly::plotlyOutput('plotly_income')),
-                          column(width = 6, height = 20,
+                          column(width = 6,style='height:70vh',
                                  plotly::plotlyOutput("plotly_bar")
                           )
                       ),
-                      div(id="Data_table",
-                          tableOutput('dataTable')
+                      h2('Raw data'),
+                      fluidRow(id="Data_table",
+                          column(width = 12,
+                                 tableOutput('dataTable')
+                          )
                       )
 )
 
@@ -173,22 +173,40 @@ server <- function(input, output, session) {
     )
     
     output$plotly_bar <- plotly::renderPlotly(
-        if(is.null(input$selState) == FALSE & is.null(input$selCounty) == FALSE){
-            ggplot(filteredData(), aes(x=County, y=Mean, fill=State_Name))
-            + geom_bar(stat="identity", position=position_dodge()) + theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-                labs(ylab = 'Mean income', fill = 'State name')
+        
+        if(is.null(input$selState) & is.null(input$selCounty)){
+            p = ggplot(NULL) + labs(y = 'Mean income',x = 'County')
+            ggplotly(p, height = 650)
+        }else{
+            p = ggplot(filteredData()) + aes(x=County, y=Mean, fill=State_Name) +
+                geom_bar(stat="identity", position=position_dodge()) + 
+                theme(axis.text.x = element_text(angle = 90, hjust = 1), panel.background = element_blank()) +
+                labs(y = 'Mean income', fill = 'State name')
+            ggplotly(p, height = 650)
         }
+       
+
+        
     )
     output$plotly_income <- plotly::renderPlotly(
-        if(is.null(input$selState) == FALSE & is.null(input$selCounty) == FALSE){
-            ggplot(filteredData()) + aes(x=County, y=Mean, fill=State_Name)
-            + geom_boxplot() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-                labs(ylab = 'Mean income', fill = 'State name')
+        
+        if(is.null(input$selState) & is.null(input$selCounty) ){
+            p = ggplot(NULL) + labs(y = 'Mean income',x = 'County')
+            ggplotly(p, height = 650)
+                
+        }else{
+            p = ggplot(filteredData(), aes(x=County, y=Mean, fill=State_Name)) +
+                geom_boxplot(position = position_dodge2()) +
+                theme(axis.text.x = element_text(angle = 90, hjust = 1), panel.background = element_blank()) +
+                labs(y = 'Mean income', fill = 'State name')
+            ggplotly(p, height = 650)
         }
+        
     )
 }
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+
 
 
