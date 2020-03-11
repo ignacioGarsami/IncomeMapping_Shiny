@@ -50,7 +50,7 @@ dataSelection = absolutePanel(top = 10, right = 10,
                               actionButton("generate", "Generate Report"),
                               br(),
                               br(),
-                              conditionalPanel(condition = "output.reportbuilt", downloadButton("my_report", "Download"))
+                              conditionalPanel(condition = "output.reportbuilt", downloadButton("reportButton", "Download"))
 )
 
 
@@ -87,7 +87,7 @@ dataPanel <- tabPanel("Data",
 
 
 reportDownload <- tabPanel('Download report',
-                            downloadButton('downloadReport', 'Download selected data'))
+                           downloadButton('downloadReport', 'Download selected data'))
 
 
 
@@ -97,8 +97,8 @@ ui = navbarPage('US Income', id = 'navBar', mapPanel, dataPanel)
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
-
-
+    
+    
     # Reactive expression for the data subsetted to what the user selected
     filteredData <- reactive({
         if(is.null(input$selState) & is.null(input$selCounty)){
@@ -177,7 +177,7 @@ server <- function(input, output, session) {
         }
     )
     
-
+    
     # output$report <- downloadHandler(
     #     # For PDF output, change this to "report.pdf"
     #     filename = function() {
@@ -244,7 +244,7 @@ server <- function(input, output, session) {
         progress$set(message = "Gathering data and building report.", 
                      detail = "This may take a while. This window will disappear  
                      when the report is ready.", value = 1)
-
+        
         params <- list(
             selState = isolate(input$selState),
             selCounty = isolate(input$selCounty),
@@ -255,7 +255,7 @@ server <- function(input, output, session) {
         
         tmp_file <- paste0(tempfile(), ".pdf") #Creating the temp where the .pdf is going to be stored
         
-        render('report.Rmd' ,params = params,  envir = new.env(parent = globalenv()))
+        tmp_file = render('report.Rmd' ,params = params,  envir = new.env(parent = globalenv()))
         
         report$filepath <- tmp_file #Assigning in the temp file where the .pdf is located to the reactive file created above
         
@@ -269,7 +269,7 @@ server <- function(input, output, session) {
     outputOptions(output, 'reportbuilt', suspendWhenHidden= FALSE)
     
     #Download report  
-    output$my_report <- downloadHandler(
+    output$reportButton <- downloadHandler(
         
         # This function returns a string which tells the client
         # browser what name to use when saving the file.
@@ -324,6 +324,7 @@ server <- function(input, output, session) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+
 
 
 
