@@ -13,6 +13,8 @@ library(leaflet)
 library(RColorBrewer)
 library(tidyverse)
 library(plotly)
+library(DT)
+library(magrittr)
 source('utils/utils.R')
 
 data = data_downloader()
@@ -69,7 +71,7 @@ dataPanel <- tabPanel("Data",
                       h2('Raw data', align = 'center',style = "font-family: Courier New;"),
                       fluidRow(id="Data_table",
                                column(width = 12,
-                                      tableOutput('dataTable')
+                                      DT::dataTableOutput(outputId  = 'dataTable')
                                )
                       )
 )
@@ -166,9 +168,7 @@ server <- function(input, output, session) {
         }
     })
     
-    output$dataTable <- renderTable({
-        filteredData()
-    })
+    output$dataTable <- DT::renderDT(filteredData())
     
     output$downloadData = downloadHandler(
         filename = function() {
