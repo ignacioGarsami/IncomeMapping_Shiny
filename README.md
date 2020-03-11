@@ -28,7 +28,7 @@ The application is meant to be a tool for exploring the different incomes throug
 
 The layour of the app is simple, with a navigation bar with only two options: map and data.
 
-Map is the principal page, where a map of the US is displayed along with bubbles indicating the areas with data and a color based on an income gradient. Using the options found on the right side of the screen, it is possible to filter by state, income or county. Also, it is possible to download the raw selected data as a csv file or an statistical analysis in pdf of the selection.
+Map is the principal page, where a map of the US is displayed along with bubbles indicating the areas with data and a color based on an income gradient. Using the options found on the right side of the screen, it is possible to filter by state, income or county. Also, it is possible to download the raw selected data as a csv file or a brief statistical analysis in pdf.
 
-On the other hand, Data shows different plots with information about the data selected in Map can be seen as well as a table displaying it.
+On the other hand, Data shows different plots with information about the data selected in Map as well as a table displaying it.
 
