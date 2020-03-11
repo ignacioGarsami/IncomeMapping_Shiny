@@ -28,6 +28,7 @@ names(r_colors) <- colors()
 
 
 dataSelection = absolutePanel(top = 10, right = 10,
+                              useShinyjs(),
                               sliderInput("range", "Mean Income", min(data$Mean), max(data$Mean),
                                           value = range(data$Mean), step = 0.1
                               ),
@@ -46,8 +47,14 @@ dataSelection = absolutePanel(top = 10, right = 10,
                               h5(tags$b('Selected data')),
                               downloadButton(label = 'Download','downloadData'),
                               h5(tags$b('Statistical report')),
-                              downloadButton(label = 'Download','report')
+                              actionButton("generate", "Generate Report"),
+                              br(),
+                              br(),
+                              conditionalPanel(condition = "output.reportbuilt", downloadButton("reportButton", "Download"))
 )
+
+
+
 
 
 map = leafletOutput("map", width = "100%", height = "90vh")
@@ -193,34 +200,93 @@ server <- function(input, output, session) {
     #     }
     # )
     # 
-    output$report <- downloadHandler(
-        # For PDF output, change this to "report.pdf"
-        filename = "report.pdf",
+    
+    
+    #This second options that somehow works
+    # output$report <- downloadHandler(
+    #     filename = function() {
+    #         paste('report.pdf')
+    #     },
+    #     
+    #     content = function(file) {
+    #         src <- normalizePath('report.Rmd')
+    #         path = getwd()
+    #         
+    #         # temporarily switch to the temp dir, in case you do not have write
+    #         # permission to the current working directory
+    #         owd <- setwd(tempdir())
+    #         on.exit(setwd(owd))
+    #         file.copy(src, 'report.Rmd', overwrite = TRUE)
+    #         setwd(path)
+    #         
+    #         params <- list(
+    #             selState = isolate(input$selState),
+    #             selCounty = isolate(input$selCounty),
+    #             income_min = isolate(input$range[1]),
+    #             income_max = isolate(input$range[2]),
+    #             data = filteredData()
+    #         )
+    #         
+    #         library(rmarkdown)
+    #         rmarkdown::render('report.Rmd' ,params = params,  envir = new.env(parent = globalenv()) )
+    #         
+    #     }
+    # )
+    # 
+    
+    report <- reactiveValues(filepath = NULL)
+    
+    observeEvent(input$generate, {
+        
+        progress <- shiny::Progress$new()
+        # Make sure it closes when we exit this reactive, even if there's an error
+        on.exit(progress$close())
+        progress$set(message = "Gathering data and building report.", 
+                     detail = "This may take a while. This window will disappear  
+                     when the report is ready.", value = 1)
+
+        params <- list(
+            selState = isolate(input$selState),
+            selCounty = isolate(input$selCounty),
+            income_min = isolate(input$range[1]),
+            income_max = isolate(input$range[2]),
+            data = filteredData()
+        )
+        
+        tmp_file <- paste0(tempfile(), ".pdf") #Creating the temp where the .pdf is going to be stored
+        
+        tmp_file = render('report.Rmd' ,params = params,  envir = new.env(parent = globalenv()))
+        
+        report$filepath <- tmp_file #Assigning in the temp file where the .pdf is located to the reactive file created above
+        
+    })
+    
+    
+    # Hide download button until report is generated
+    output$reportbuilt <- reactive({
+        return(!is.null(report$filepath))
+    })
+    outputOptions(output, 'reportbuilt', suspendWhenHidden= FALSE)
+    
+    #Download report  
+    output$reportButton <- downloadHandler(
+        
+        # This function returns a string which tells the client
+        # browser what name to use when saving the file.
+        filename = function() {
+            paste0(input$client, "_", Sys.Date(), ".pdf") %>%
+                gsub(" ", "_", .)
+        },
+        
+        # This function should write data to a file given to it by
+        # the argument 'file'.
         content = function(file) {
-            # Copy the report file to a temporary directory before processing it, in
-            # case we don't have write permissions to the current working dir (which
-            # can happen when deployed).
-            tempReport <- file.path(tempdir(), "report.Rmd")
-            file.copy("report.Rmd", tempReport, overwrite = TRUE)
             
-            # Set up parameters to pass to Rmd document
-            params <- list(
-                selState = isolate(input$selState),
-                selCounty = isolate(input$selCounty),
-                income_min = isolate(input$range[1]),
-                income_max = isolate(input$range[2]),
-                data = filteredData()
-            )
+            file.copy(report$filepath, file)
             
-            # Knit the document, passing in the `params` list, and eval it in a
-            # child of the global environment (this isolates the code in the document
-            # from the code in this app).
-            rmarkdown::render(tempReport, output_file = file,
-                              params = params,
-                              envir = new.env(parent = globalenv())
-            )
         }
     )
+
     
     output$plotly_bar <- plotly::renderPlotly(
         
