@@ -1,0 +1,68 @@
+---
+title: 'Income mapping in the USA: Analysis'
+author: "IncomeMapper"
+date: "11/3/2020"
+output: pdf_document
+params:
+  selState: ['Hawaii','Alaska']
+  selCounty: ['Mobile County', 'Honolulu County']
+  income_min: 0
+  income_max: 300000
+  data: data.frame()
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include = FALSE}
+
+library(tidyverse)
+library(ggplot2)
+#source('utils/utils.R')
+```
+
+```{r}
+
+head(params$data)
+
+```
+
+# States
+```{r}
+# Selected states
+params$selState
+```
+
+# Counties
+```{r}
+# Selected counties
+params$selCounty
+```
+
+# Income range
+```{r}
+# Min and max income selected
+params$income_min
+params$income_max
+```
+
+# Boxplot of mean income by county
+
+```{r, echo = FALSE}
+
+ggplot(params$data, aes(x=County, y=Mean, fill=State_Name)) +
+                geom_boxplot(position = position_dodge2()) +
+                theme(axis.text.x = element_text(angle = 90, hjust = 1), panel.background = element_blank()) +
+                labs(y = 'Mean income', fill = 'State name')
+
+```
+
+# Bar plot of standard deviation in income by county
+
+```{r, echo = FALSE}
+ggplot(params$data) + aes(x=County, y=Stdev, fill=State_Name) +
+                geom_bar(stat="identity", position=position_dodge()) +
+                theme(axis.text.x = element_text(angle = 90, hjust = 1), panel.background = element_blank()) +
+                labs(y = 'Income standard deviation', fill = 'State name')
+```

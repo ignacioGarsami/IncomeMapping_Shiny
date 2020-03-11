@@ -15,6 +15,7 @@ library(tidyverse)
 library(plotly)
 library(DT)
 library(magrittr)
+library(rmarkdown)
 source('utils/utils.R')
 
 data = data_downloader()
@@ -45,7 +46,7 @@ dataSelection = absolutePanel(top = 10, right = 10,
                               h5(tags$b('Selected data')),
                               downloadButton(label = 'Download','downloadData'),
                               h5(tags$b('Statistical report')),
-                              downloadButton(label = 'Download','downloadReport')
+                              downloadButton(label = 'Download','report')
 )
 
 
@@ -89,17 +90,8 @@ ui = navbarPage('US Income', id = 'navBar', mapPanel, dataPanel)
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
-    # 
-    #     observe(if(input$navBar=="Map of incomes in the US") {
-    #         cat(file=stderr(), input$navBar, "\n")
-    #         shinyjs::hide("header")
-    #     } else {
-    #         cat(file=stderr(), input$navBar, "\n")
-    #         shinyjs::show("header")
-    #     })
-    #    
-    
-    # 
+
+
     # Reactive expression for the data subsetted to what the user selected
     filteredData <- reactive({
         if(is.null(input$selState) & is.null(input$selCounty)){
@@ -147,7 +139,6 @@ server <- function(input, output, session) {
                                                                                         "Zip Code:", Zip_Code, "<br>",
                                                                                         "Mean Income:", Mean, "<br>",
                                                                                         'Std Deviation:', Stdev
-                                                                                        
                               )
             )
     })
@@ -180,49 +171,28 @@ server <- function(input, output, session) {
     )
     
 
-    #Placeholder function until actual report exists
-    
-    # observe({
-    #     if(is.null(input$selState) == FALSE | is.null(input$selCounty) == FALSE){
-    #         output$downloadData = downloadHandler(
-    #             filename = function() {
-    #                 paste('income_data', '.csv', sep='')
-    #             },
-    #             content = function(con) {
-    #                 write.csv(filteredData(), con)
-    #             }
-    #         )
-    #     }
-    # 
-    # })
-
-    output$downloadReport = downloadHandler(
+    output$report <- downloadHandler(
+        # For PDF output, change this to "report.pdf"
         filename = function() {
-            paste('income_data', '.csv', sep='')
+            paste('report')
         },
-        content = function(con) {
-            write.csv(filteredData(), con)
+        content = function(file) {
+            tempReport <- file.path(tempdir(), "report.Rmd")
+            # Set up parameters to pass to Rmd document
+            params <- list(
+                selState = isolate(input$selState),
+                selCounty = isolate(input$selCounty),
+                income_min = isolate(input$range[1]),
+                income_max = isolate(input$range[2]),
+                data = filteredData()
+            )
+
+            # Knit the document, passing in the `params` list, and eval it in a
+            # child of the global environment (this isolates the code in the document
+            # from the code in this app).
+            rmarkdown::render(output_format = 'pdf_document',tempReport ,params = params,  envir = new.env(parent = globalenv()) )
         }
     )
-
-    
-    # output$plotly_bar <- plotly::renderPlotly(
-    #     
-    #     if(is.null(input$selState) & is.null(input$selCounty)){
-    #         p = ggplot(NULL) + labs(y = 'Mean income',x = 'County')
-    #         ggplotly(p, height = 650)
-    #     }else{
-    #         p = ggplot(filteredData()) + aes(x=County, y=Mean, fill=State_Name) +
-    #             geom_bar(stat="identity", position=position_dodge()) + 
-    #             theme(axis.text.x = element_text(angle = 90, hjust = 1), panel.background = element_blank()) +
-    #             labs(y = 'Mean income', fill = 'State name')
-    #         ggplotly(p, height = 650)
-    #     }
-    #    
-    # 
-    #     
-    # )
-    # 
     
     output$plotly_bar <- plotly::renderPlotly(
         
@@ -260,6 +230,7 @@ server <- function(input, output, session) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+
 
 
 
