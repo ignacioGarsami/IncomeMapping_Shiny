@@ -177,7 +177,7 @@ server <- function(input, output, session) {
             paste('report')
         },
         content = function(file) {
-            tempReport <- file.path(tempdir(), "report.Rmd")
+            tempReport <- file.path("report.Rmd")
             # Set up parameters to pass to Rmd document
             params <- list(
                 selState = isolate(input$selState),

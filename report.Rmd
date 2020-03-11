@@ -24,20 +24,29 @@ library(ggplot2)
 
 ```{r}
 
-head(params$data)
+summary(params$data)
 
 ```
 
 # States
 ```{r}
 # Selected states
-params$selState
+if(is.null(params$selState)){
+  print('None selected')
+}else{
+  params$selState
+}
+
 ```
 
 # Counties
 ```{r}
 # Selected counties
-params$selCounty
+if(is.null(params$selCounty)){
+  print('None selected')
+}else{
+  params$selCounty
+}
 ```
 
 # Income range
@@ -50,19 +59,26 @@ params$income_max
 # Boxplot of mean income by county
 
 ```{r, echo = FALSE}
-
-ggplot(params$data, aes(x=County, y=Mean, fill=State_Name)) +
-                geom_boxplot(position = position_dodge2()) +
-                theme(axis.text.x = element_text(angle = 90, hjust = 1), panel.background = element_blank()) +
-                labs(y = 'Mean income', fill = 'State name')
+if(is.null(params$selCounty) == FALSE | is.null(params$selState) == FALSE){
+  ggplot(params$data, aes(x=County, y=Mean, fill=State_Name)) +
+                  geom_boxplot(position = position_dodge2()) +
+                  theme(axis.text.x = element_text(angle = 90, hjust = 1), panel.background = element_blank()) +
+                  labs(y = 'Mean income', fill = 'State name')
+}else{
+  print('Due to the high number of observations, plotting is not possible with the selected data')
+}
 
 ```
 
 # Bar plot of standard deviation in income by county
 
 ```{r, echo = FALSE}
-ggplot(params$data) + aes(x=County, y=Stdev, fill=State_Name) +
-                geom_bar(stat="identity", position=position_dodge()) +
-                theme(axis.text.x = element_text(angle = 90, hjust = 1), panel.background = element_blank()) +
-                labs(y = 'Income standard deviation', fill = 'State name')
+if(is.null(params$selCounty) == FALSE | is.null(params$selState) == FALSE){
+  ggplot(params$data) + aes(x=County, y=Stdev, fill=State_Name) +
+                  geom_bar(stat="identity", position=position_dodge()) +
+                  theme(axis.text.x = element_text(angle = 90, hjust = 1), panel.background = element_blank()) +
+                  labs(y = 'Income standard deviation', fill = 'State name')
+}else{
+  print('Due to the high number of observations, plotting is not possible with the selected data')
+}
 ```
