@@ -63,6 +63,13 @@ dataPanel <- tabPanel("Data",
                                  plotly::plotlyOutput("plotly_bar")
                           )
                       ),
+                      h2('Statistical report', align = 'center', style = 'font-family: Courier New;'),
+                      fluidRow(
+                          column(width = 6,
+                                 downloadButton('downloadReport', 'Download')
+                                 )
+                          
+                      ),
                       h2('Raw data', align = 'center',style = "font-family: Courier New;"),
                       fluidRow(id="Data_table",
                           column(width = 12,
