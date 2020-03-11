@@ -274,17 +274,19 @@ server <- function(input, output, session) {
         # This function returns a string which tells the client
         # browser what name to use when saving the file.
         filename = function() {
-            paste('report',".pdf")
+            paste0(input$client, "_", Sys.Date(), ".pdf") %>%
+                gsub(" ", "_", .)
         },
         
         # This function should write data to a file given to it by
         # the argument 'file'.
         content = function(file) {
+            
             file.copy(report$filepath, file)
             
         }
     )
-
+    
     
     output$plotly_bar <- plotly::renderPlotly(
         
