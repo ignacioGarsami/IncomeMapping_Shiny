@@ -18,7 +18,7 @@ The app make use of the following packages:
 
 # Introduction
 
-The chosen data can be found in the following link [Link](https://www.kaggle.com/goldenoakresearch/us-household-income-stats-geo-locations) and its retrieval was possible thanks to the work in [Link](https://github.com/bernardo-dauria/kaggler). 
+The chosen data can be found [here](https://www.kaggle.com/goldenoakresearch/us-household-income-stats-geo-locations) and its retrieval was possible thanks to the adaptation of the Kaggler library for R performed [here](https://github.com/bernardo-dauria/kaggler). 
 
 Data is composed by numerous attributes related to the income of U.S cities. Theres stpatial information such as location, mean income, standard deviations, water and land proportions, etc. Every time the app is executed the data is directly loaded from Kaggle leaving no trace in the computer. As a result of this, if the data in its original Kaggle repository is updated, so will the application.
 
