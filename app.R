@@ -182,19 +182,19 @@ server <- function(input, output, session) {
     
     #Placeholder function until actual report exists
     
-    observe({
-        if(is.null(input$selState) == FALSE | is.null(input$selCounty) == FALSE){
-            output$downloadData = downloadHandler(
-                filename = function() {
-                    paste('income_data', '.csv', sep='')
-                },
-                content = function(con) {
-                    write.csv(filteredData(), con)
-                }
-            )
-        }
-    
-    })
+    # observe({
+    #     if(is.null(input$selState) == FALSE | is.null(input$selCounty) == FALSE){
+    #         output$downloadData = downloadHandler(
+    #             filename = function() {
+    #                 paste('income_data', '.csv', sep='')
+    #             },
+    #             content = function(con) {
+    #                 write.csv(filteredData(), con)
+    #             }
+    #         )
+    #     }
+    # 
+    # })
     
     # output$plotly_bar <- plotly::renderPlotly(
     #     
