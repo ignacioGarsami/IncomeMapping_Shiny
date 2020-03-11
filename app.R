@@ -50,7 +50,7 @@ dataSelection = absolutePanel(top = 10, right = 10,
                               actionButton("generate", "Generate Report"),
                               br(),
                               br(),
-                              conditionalPanel(condition = "output.reportbuilt", downloadButton("report", "Download"))
+                              conditionalPanel(condition = "output.reportbuilt", downloadButton("my_report", "Download"))
 )
 
 
@@ -255,7 +255,7 @@ server <- function(input, output, session) {
         
         tmp_file <- paste0(tempfile(), ".pdf") #Creating the temp where the .pdf is going to be stored
         
-        render('report.Rmd' ,params = params,output_file = tmp_file,  envir = new.env(parent = globalenv()))
+        render('report.Rmd' ,params = params,  envir = new.env(parent = globalenv()))
         
         report$filepath <- tmp_file #Assigning in the temp file where the .pdf is located to the reactive file created above
         
@@ -269,7 +269,7 @@ server <- function(input, output, session) {
     outputOptions(output, 'reportbuilt', suspendWhenHidden= FALSE)
     
     #Download report  
-    output$report <- downloadHandler(
+    output$my_report <- downloadHandler(
         
         # This function returns a string which tells the client
         # browser what name to use when saving the file.
