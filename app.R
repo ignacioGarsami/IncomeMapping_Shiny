@@ -66,13 +66,6 @@ dataPanel <- tabPanel("Data",
                                  plotly::plotlyOutput("plotly_bar")
                           )
                       ),
-                      h2('Statistical report', align = 'center', style = 'font-family: Courier New;'),
-                      fluidRow(
-                          column(width = 6,
-                                 downloadButton('downloadReport', 'Download')
-                                 )
-                          
-                      ),
                       h2('Raw data', align = 'center',style = "font-family: Courier New;"),
                       fluidRow(id="Data_table",
                                column(width = 12,
@@ -82,15 +75,14 @@ dataPanel <- tabPanel("Data",
 )
 
 
-<<<<<<< HEAD
+
 reportDownload <- tabPanel('Download report',
                             downloadButton('downloadReport', 'Download selected data'))
 
 
-ui = navbarPage('US Income', id = 'navBar', mapPanel, dataPanel, reportDownload)
-=======
+
 ui = navbarPage('US Income', id = 'navBar', mapPanel, dataPanel)
->>>>>>> report
+
 
 
 # Define server logic required to draw a histogram
@@ -187,7 +179,7 @@ server <- function(input, output, session) {
         }
     )
     
-<<<<<<< HEAD
+
     #Placeholder function until actual report exists
     
     # observe({
@@ -203,7 +195,7 @@ server <- function(input, output, session) {
     #     }
     # 
     # })
-=======
+
     output$downloadReport = downloadHandler(
         filename = function() {
             paste('income_data', '.csv', sep='')
@@ -212,7 +204,7 @@ server <- function(input, output, session) {
             write.csv(filteredData(), con)
         }
     )
->>>>>>> report
+
     
     # output$plotly_bar <- plotly::renderPlotly(
     #     
